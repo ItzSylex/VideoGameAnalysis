@@ -107,15 +107,31 @@ sales_year_region = px.line(
     data_frame = sales_over_year_by_region,
     x = "Year",
     y = ['NA_Sales','EU_Sales','JP_Sales','Other_Sales'],
-    color_discrete_sequence = px.colors.sequential.Aggrnyl
+    color_discrete_sequence = px.colors.sequential.Aggrnyl,
+    title = "Sales over the years by region"
 )
 
 figures.append(sales_year_region)
 
 
-# What region has made more sales
+sales_year_region.update_traces(line = dict(width = 2.5))
 
-# What year had more releases
+# Sales by genre
+
+sales_by_genre = df.groupby("Genre").sum()["Global_Sales"].reset_index()
+sales_by_genre = sales_by_genre.assign(Percentage = sales_by_genre["Global_Sales"] / sales_by_genre["Global_Sales"].sum() * 100)
+
+
+global_sales_by_genre = px.bar(
+    data_frame = sales_by_genre,
+    y = "Percentage",
+    x = "Genre",
+    color_discrete_sequence = px.colors.sequential.Aggrnyl,
+    title = "Percentage of sales by genre",
+    text_auto = ".2s"
+)
+
+figures.append(global_sales_by_genre)
 
 # Releases over the years by publisher
 
@@ -128,18 +144,20 @@ releases_over_the_years_by_publisher = px.line(
         x = "Year",
         y = "Count",
         color = "Publisher",
-        color_discrete_sequence = px.colors.sequential.Aggrnyl
+        color_discrete_sequence = px.colors.sequential.Aggrnyl,
     )
 
-releases_over_the_years_by_publisher.update_layout(legend=dict(
-    yanchor = "bottom", 
-    y = 0.99,
-    xanchor = "left",
-    x = 0.01,
+releases_over_the_years_by_publisher.update_layout(yaxis_title = "Releases",
+    legend=dict(
+    y = 1.2, 
+    x = 0,
     orientation = "h"
 ))
 
 figures.append(releases_over_the_years_by_publisher)
+
+releases_over_the_years_by_publisher.update_traces(line = dict(width = 2.5))
+
 
 app.layout = html.Div([
 
@@ -152,9 +170,9 @@ app.layout = html.Div([
 
         html.Div([dcc.Graph(figure = releases_over_the_years_by_publisher)], className="div4"),
 
-        html.Div([dcc.Graph(figure = sales_year_region)], className="div5"),
+        html.Div([dcc.Graph(figure = global_sales_by_genre)], className="div5"),
 
-        html.Div([dcc.Graph(figure = releases_per_publisher)], className="div6"),
+        html.Div([dcc.Graph(figure = sales_year_region)], className="div6"),
 
     ], className = "parent")
 
